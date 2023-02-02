@@ -1,15 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@500&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-body {
-    background-color: rgb(47, 47, 47);
-    font-family: 'Comfortaa', cursive;
-    font-weight: bold;
-}
-
 
 @layer components {
     .panel-section {
