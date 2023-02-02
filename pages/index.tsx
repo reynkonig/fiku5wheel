@@ -10,7 +10,7 @@ import Panel from '../components/ui/Panel';
 
 export default function Home() {
   return (
-    <div className="flex w-screen h-screen">
+    <div className="flex w-screen h-screen font-bold">
       <Panel />
       <Suspense fallback={null}>
         <Canvas className="w-screen h-screen">
