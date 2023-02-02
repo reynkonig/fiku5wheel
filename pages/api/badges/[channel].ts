@@ -8,7 +8,7 @@ const DEFAULT_CHANNEL = 'dazzlingmoonmakesmysmile';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const badges: IBadgesImageSets = { global: [], local: [] };
 
-  const channel = process.env.CHANNEL ?? DEFAULT_CHANNEL;
+  const { channel } = req.query;
 
   const headers = {
     "Authorization": `Bearer ${process.env.APP_TOKEN}`,
