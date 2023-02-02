@@ -33,6 +33,13 @@ export default class SessionStore {
     makeAutoObservable(this, {}, { deep: true });
   }
 
+  public get neverEmptyLabels () {
+    return this.labeledItems.length > 0
+      ? this.labeledItems
+      : [{ label: '' }]
+    ;
+  }
+
   private setReady() {
     this.ready = true;
   }
@@ -68,7 +75,8 @@ export default class SessionStore {
 
   addLabel(label: string, userstate?: Userstate) {
     const alreadyInclude = this.labeledItems.filter((item) => item.label === label).length > 0;
-    if(this.labeledItems.length < this.root.settings.maxLabelsCount && !alreadyInclude) {
+    const limitReached = this.labeledItems.length >= this.root.settings.maxLabelsCount;
+    if(!limitReached && !alreadyInclude) {
       this.labeledItems = [...this.labeledItems, { label, userstate }];
     }
   }

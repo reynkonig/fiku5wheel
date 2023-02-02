@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { damp3 } from 'maath/easing';
 import { useEffect, useRef, useState } from 'react';
+import { Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-
 import { observer } from 'mobx-react';
 
 import {
@@ -14,12 +14,12 @@ import Pointer from './Pointer';
 import OuterRing from './OuterRing';
 
 import store from '../common/stores/Store';
-import { Text } from '@react-three/drei';
+
 
 
 function Wheel({ ...props }: { [p: string]: any }) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const labeledItems = store.session.labeledItems.length > 0 ? store.session.labeledItems : [ { label: '' } ]
+
+  const { neverEmptyLabels } = store.session;
   const { palette, geometry } = store.settings;
 
   const [ hovered, setHovered ] = useState<boolean>(false);
@@ -41,7 +41,7 @@ function Wheel({ ...props }: { [p: string]: any }) {
     if (sectorGeometryRef.current) {
       const geometryData = GenerateSectorGeometryData({
         radius: geometry.radius,
-        angle: 360 / labeledItems.length,
+        angle: 360 / neverEmptyLabels.length,
         resolution: 3,
         depth: geometry.thickness
       });
@@ -58,9 +58,9 @@ function Wheel({ ...props }: { [p: string]: any }) {
       sectorGeometryRef.current.computeBoundingBox();
       sectorGeometryRef.current.computeBoundingSphere();
     }
-  }, [ geometry, labeledItems ]);
+  }, [ geometry, neverEmptyLabels ]);
 
-  useFrame((state, delta, frame) => {
+  useFrame((state, delta) => {
     if (totalTransformRef.current) {
       const scale = new Array(3).fill(hovered ? 1.05 : 1) as [number, number, number];
       damp3(totalTransformRef.current.scale, scale, 0.15, delta, 1);
@@ -75,10 +75,13 @@ function Wheel({ ...props }: { [p: string]: any }) {
     }
     else {
       const angle = 360 - (rotatablePartRef.current.rotation.z * 180 / Math.PI);
-      const stepAngle = 360 / labeledItems.length;
+      const stepAngle = 360 / neverEmptyLabels.length;
       const i = Math.abs(Math.floor((angle + stepAngle / 2) / stepAngle));
-      const winner = labeledItems[i >= labeledItems.length ? i - labeledItems.length : i];
-      store.session.setWinner(winner);
+      const winner = neverEmptyLabels[i >= neverEmptyLabels.length ? i - neverEmptyLabels.length : i];
+
+      if(winner !== store.session.winner) {
+        store.session.setWinner(winner);
+      }
     }
 
     totalTransformRef.current.rotation.y = state.mouse.x / 2.5;
@@ -97,16 +100,20 @@ function Wheel({ ...props }: { [p: string]: any }) {
       } }
       {...props}
     >
-      <Text
-        anchorX="center"
-        anchorY="middle"
-        fontSize={0.2}
-        color={store.session.winner.userstate?.color ?? 'white'}
-        outlineWidth={0.005}
-        position={[0, 0, 0.5]}
-      >
-        {store.session.winner.label}
-      </Text>
+      {
+        store.wheel.spinStateIndex === 0 ? (
+        <Text
+          anchorX="center"
+          anchorY="middle"
+          fontSize={0.2}
+          color={store.session.winner.userstate?.color ?? 'white'}
+          outlineWidth={0.005}
+          position={[0, 0, 0.5]}
+        >
+          {store.session.winner.label}
+        </Text>
+        ) : null
+      }
       <Pointer
         material={outlineMaterialRef.current}
         position={[-geometry.radius, 0, geometry.thickness]}
@@ -128,7 +135,7 @@ function Wheel({ ...props }: { [p: string]: any }) {
         />
       </mesh>
       <group name="sectors" ref={rotatablePartRef}>{
-          labeledItems.map((item, i) => (
+        neverEmptyLabels.map((item, i) => (
             <Sector
               key={item.label}
               label={item.label}
@@ -142,7 +149,7 @@ function Wheel({ ...props }: { [p: string]: any }) {
                       : sectorMaterialBRef.current
                   )
               }
-              rotation={[0, 0, i * 360 / labeledItems.length * Math.PI / 180]}
+              rotation={[0, 0, i * 360 / neverEmptyLabels.length * Math.PI / 180]}
             />
           ))
         }</group >
