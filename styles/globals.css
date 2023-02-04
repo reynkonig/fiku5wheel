@@ -4,7 +4,7 @@
 
 @layer components {
     .panel-container {
-        @apply flex absolute w-full h-full rounded-lg;
+        @apply flex absolute w-full h-full;
     }
 
     .panel-section {

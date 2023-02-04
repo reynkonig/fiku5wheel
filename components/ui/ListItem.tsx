@@ -1,16 +1,16 @@
 import _ from 'lodash';
 import { ratio } from 'fuzzball';
-import { useState } from 'react';
-import { observer } from 'mobx-react';
 
-import store from '../../common/stores/Store';
+import { useState } from 'react';
+import { useSetAtom } from 'jotai';
 
 import { IListedItem } from '../../common/Interfaces';
 
+import { removeItemAtom } from '../../atoms/ItemAtoms';
+
 import { FaTrash } from 'react-icons/fa';
+
 import Badges from './Badges';
-
-
 
 interface IListItemProps {
   item: IListedItem;
@@ -31,8 +31,8 @@ export function getDisplayName (item: IListedItem) {
   return item.label;
 }
 
-function ListItem({ item } : IListItemProps) {
-  const { badges } = store.content;
+export default function ListItem({ item } : IListItemProps) {
+  const removeItem = useSetAtom(removeItemAtom);
   const [ copied, setCopied ] = useState(false);
 
   const copyLabel = async () => {
@@ -58,7 +58,7 @@ function ListItem({ item } : IListItemProps) {
         onClick={copyLabel}
       >
         <div className="flex w-24 space-x-0.5">
-          <Badges {...{ item, badges, size: 18 }}/>
+          <Badges {...{ item, size: 18 }}/>
         </div>
         <div
           className={`flex w-52 select-none pt-0.5 transition-transform`}
@@ -71,7 +71,7 @@ function ListItem({ item } : IListItemProps) {
         <div className="flex w-fit ml-auto">
           <button
             className={`hover:scale-125 transition-all rounded-md ${copied ? 'text-white' : 'text-red-500'}`}
-            onClick={() => store.session.removeItem(item.label)}
+            onClick={() => removeItem(item.label)}
           >
             <FaTrash />
           </button>
@@ -80,5 +80,3 @@ function ListItem({ item } : IListItemProps) {
     </div>
   );
 }
-
-export default observer(ListItem);

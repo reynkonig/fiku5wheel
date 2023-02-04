@@ -4,20 +4,20 @@ import {
 } from '../Interfaces';
 
 export interface IGeneratePointerGeometryDataProps {
-  wheelSettings: IWheelGeometrySettings;
+  geometrySettings: IWheelGeometrySettings;
 }
 
-export default function GeneratePointerGeometryData({ wheelSettings } : IGeneratePointerGeometryDataProps): IMeshGeometryData {
+export default function GeneratePointerGeometryData({ geometrySettings } : IGeneratePointerGeometryDataProps): IMeshGeometryData {
   const vertices: number[] = [];
 
-  const length = wheelSettings.outerRingWidth + wheelSettings.textPadding / 2;
+  const length = geometrySettings.outerRingWidth + geometrySettings.textPadding / 2;
   const height = length * 2;
 
   const halfLength = length / 2;
   const halfHeight = height / 2;
 
   for(let heightIndex = 0; heightIndex < 2; heightIndex++) {
-    const h = heightIndex * wheelSettings.pointerThickness;
+    const h = heightIndex * geometrySettings.pointerThickness;
     vertices.push(
       halfLength, 0, h,
       -halfLength, halfHeight, h,

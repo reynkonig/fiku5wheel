@@ -6,24 +6,24 @@ import {
 const TRIANGLES_PER_LOOP = 4;
 
 export interface IGenerateRingGeometryDataProps {
-  wheelSettings: IWheelGeometrySettings;
+  geometrySettings: IWheelGeometrySettings;
 }
 
-export default function GenerateRingGeometryData({ wheelSettings }: IGenerateRingGeometryDataProps): IMeshGeometryData {
+export default function GenerateRingGeometryData({ geometrySettings }: IGenerateRingGeometryDataProps): IMeshGeometryData {
   const vertices: number[] = [];
   const triangles: number[] = [];
 
-  const stepsCount = Math.floor(360 / wheelSettings.resolution * 2);
+  const stepsCount = Math.floor(360 / geometrySettings.resolution * 2);
   const stepAngle = 360 /stepsCount;
 
   for (let angleIndex = 0; angleIndex < stepsCount; angleIndex++) {
     const angle = stepAngle * angleIndex * Math.PI / 180;
 
     for(let heightIndex = 0; heightIndex < 2; heightIndex++) {
-      const height = heightIndex * wheelSettings.thickness;
+      const height = heightIndex * geometrySettings.thickness;
 
       for(let radiusIndex = 0; radiusIndex < 2; radiusIndex++) {
-        const radius = wheelSettings.radius + radiusIndex * wheelSettings.outerRingWidth;
+        const radius = geometrySettings.radius + radiusIndex * geometrySettings.outerRingWidth;
 
         vertices.push(Math.sin(angle) * radius, Math.cos(angle) * radius, height)
       }

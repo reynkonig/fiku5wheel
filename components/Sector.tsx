@@ -1,9 +1,16 @@
 import _ from 'lodash';
 import * as THREE from 'three';
+import { useAtomValue } from 'jotai';
 
 import { Text } from '@react-three/drei';
 
-import store from '../common/stores/Store';
+import {
+  geometrySettingsAtom,
+  maxItemsCountAtom,
+  paletteAtom
+} from '../atoms/SettingsAtoms';
+import { itemsCountAtom } from '../atoms/ItemAtoms';
+
 
 export interface ISectorProps {
   label: string;
@@ -12,20 +19,23 @@ export interface ISectorProps {
 }
 
 export default function Sector({ label, geometry, material, ...props }: ISectorProps & { [p: string]: any }) {
-  const { settings } = store;
+  const palette = useAtomValue(paletteAtom);
+  const geometrySettings = useAtomValue(geometrySettingsAtom);
+  const itemsCount = useAtomValue(itemsCountAtom);
+  const maxItemsCount = useAtomValue(maxItemsCountAtom)
 
   return (
     <group {...props} >
       <Text
-        color={settings.palette.outline}
-        fontSize={_.clamp(0.075 * (1 - store.session.items.length / settings.maxLabelsCount), 0.04, 0.075)}
+        color={palette.outline}
+        fontSize={_.clamp(0.075 * (1 - itemsCount / maxItemsCount), 0.04, 0.075)}
         anchorX='left'
         anchorY='middle'
-        position={[-settings.geometry.radius + settings.geometry.textPadding, 0, settings.geometry.thickness + 0.01]}
+        position={[-geometrySettings.radius + geometrySettings.textPadding, 0, geometrySettings.thickness + 0.01]}
         rotation={[0, 0, 0]}
         font='/fonts/BalsamiqSans-Bold.ttf'
       >
-        {label}
+        {label.length < 24 ? label : label.substring(0, 24) + '...'}
       </Text>
       <mesh geometry={geometry} material={material}/>
     </group>

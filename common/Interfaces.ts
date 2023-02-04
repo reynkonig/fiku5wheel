@@ -44,7 +44,7 @@ export interface IBadgeVersion {
   image_url_4x: string;
 }
 
-export interface ISpinStateSettings {
+export interface ISpinStageSettings {
   name: string;
   timing: number;
   velocityPercent: number;
@@ -54,10 +54,5 @@ export interface ISpinStateSettings {
 export interface ISpinSettings {
   duration: number;
   maxVelocity: number;
-  states: ISpinStateSettings[];
-}
-
-export interface IFetchProp<T> {
-  data: T | undefined;
-  loaded: boolean;
+  stages: ISpinStageSettings[];
 }

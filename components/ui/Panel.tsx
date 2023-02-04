@@ -1,8 +1,19 @@
-import useSWR from 'swr';
-import axios from 'axios';
-import { observer } from 'mobx-react';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 
-import store from '../../common/stores/Store';
+import { maxItemsCountAtom } from '../../atoms/SettingsAtoms';
+import { clearItemsAtom, itemsAtom, winnerAtom } from '../../atoms/ItemAtoms';
+import {
+  readyAtom,
+  canJoinAtom,
+  joinMessageAtom
+} from '../../atoms/SessionAtoms';
+
+
+import ListItem from './ListItem';
+import AddButton from './AddButton';
+
+import TwitchLoader from './TwitchLoader';
+import WinnerSection from './WinnerSection';
 
 import {
   FaLock,
@@ -10,29 +21,17 @@ import {
   FaLockOpen,
 } from 'react-icons/fa';
 
-import ListItem from './ListItem';
-import AddButton from './AddButton';
+export default function Panel() {
+  const ready = useAtomValue(readyAtom);
+  const maxItemsCount = useAtomValue(maxItemsCountAtom);
 
-import { IBadges } from '../../common/Interfaces';
+  const clearItems = useSetAtom(clearItemsAtom);
 
-import TwitchLoader from './TwitchLoader';
-import WinnerSection from './WinnerSection';
-import { useEffect } from 'react';
+  const items = useAtomValue(itemsAtom);
+  const winner = useAtomValue(winnerAtom);
+  const [ canJoin, setCanJoin ] = useAtom(canJoinAtom);
+  const [ joinMessage , setJoinMessage ] = useAtom(joinMessageAtom);
 
-
-const fetcher = (url: string) => axios.get(url).then((response) => response.data);
-
-function Panel() {
-  const { maxLabelsCount, channel } = store.settings;
-  const { ready, items, winner, joinMessage } = store.session;
-
-  const { data: badges } = useSWR<IBadges>(`/api/badges/${channel}`, fetcher);
-
-  useEffect(() => {
-    if(badges !== undefined) {
-      store.content.setBadges(badges);
-    }
-  }, [ badges ]);
 
   return (
     <div
@@ -41,23 +40,23 @@ function Panel() {
         height: "calc(100vh - 2.25rem)"
       }}
     >
-      <TwitchLoader {...{ ready }} />
+      <TwitchLoader />
       <div className={`panel-container flex-col py-2 px-2 space-y-2 shadow bg-white bg-opacity-25 ${ready ? '' : 'overflow-hidden'}`}>
         <div className="panel-section">
           <input
-            disabled={store.session.joinUsersFromChat}
+            disabled={canJoin}
             className="rounded-md w-full outline-none px-2 pt-px bg-opacity-40"
             placeholder="Слово для участия"
             onChange={(e) => {
-              store.session.setJoinMessage(e.target.value);
+              setJoinMessage(e.target.value);
             }}
             value={joinMessage}
           />
           <button
-            className={`text-white px-4 rounded-md text-xs aspect-square hovered-anim ${!store.session.joinUsersFromChat ? 'bg-green-500' : 'bg-red-500'}`}
-            onClick={() => store.session.switchJoinAccess()}
+            className={`text-white px-4 rounded-md text-xs aspect-square hovered-anim ${!canJoin ? 'bg-green-500' : 'bg-red-500'}`}
+            onClick={() => setCanJoin(prev => !prev)}
           >
-            { store.session.joinUsersFromChat
+            { canJoin
               ? <FaLockOpen className="scale-125" />
               : <FaLock className="scale-125" />
             }
@@ -66,15 +65,15 @@ function Panel() {
         <div className="panel-section bg-white pt-2 rounded-md flex justify-end px-2 pb-2 shadow">
               <div className="flex w-full rounded-md bg-gray-300 text-white justify-center items-center pt-px overflow-hidden">
                 <span className="absolute w-auto flex">
-                  {items.length}&nbsp;/&nbsp;{maxLabelsCount}
+                  {items.length}&nbsp;/&nbsp;{maxItemsCount}
                 </span>
-                <div className="flex h-full bg-violet-500 mr-auto transition-all duration-75" style={{ width: `${Math.round(items.length / maxLabelsCount * 100)}%` }}/>
+                <div className="flex h-full bg-violet-500 mr-auto transition-all duration-75" style={{ width: `${Math.round(items.length / maxItemsCount * 100)}%` }}/>
               </div>
           <AddButton />
           <button
             className="bottom-btn bg-red-500"
-            onClick={() => store.session.clearItems()}
-            disabled={store.session.items.length === 0}
+            onClick={() => clearItems()}
+            disabled={items.length === 0}
           >
             <FaEraser />
           </button>
@@ -94,5 +93,3 @@ function Panel() {
     </div>
   );
 }
-
-export default observer(Panel);

@@ -1,10 +1,13 @@
 import { ChangeEvent, useRef, useState } from 'react';
-import { observer } from 'mobx-react';
+import { useSetAtom } from 'jotai';
+
+import { addItemAtom } from '../../atoms/ItemAtoms';
 
 import { FaCheck, FaPlus, FaTimes } from 'react-icons/fa';
-import store from '../../common/stores/Store';
 
 function AddButton() {
+  const addItem = useSetAtom(addItemAtom);
+
   const [ label, setLabel ] = useState<string>("");
   const [ active, setActive ] = useState<boolean>(false);
 
@@ -17,7 +20,7 @@ function AddButton() {
   const validLabel = label.length !== 0;
 
   const addLabel = () => {
-    store.session.addItem(label);
+    addItem({ label });
     setLabel('');
     setActive(false);
   }
@@ -81,4 +84,4 @@ function AddButton() {
   );
 }
 
-export default observer(AddButton);
+export default AddButton;

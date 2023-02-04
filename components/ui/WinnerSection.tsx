@@ -1,15 +1,18 @@
 import { useState } from 'react';
-import { observer } from 'mobx-react';
-import { FaTrash } from 'react-icons/fa';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 import { getDisplayName } from './ListItem';
 
+import { removeItemAtom, winnerAtom } from '../../atoms/ItemAtoms';
+
+import { FaTrash } from 'react-icons/fa';
+
 import Badges from './Badges';
-import store from '../../common/stores/Store';
 
 
-function WinnerSection() {
-  const { winner } = store.session;
+export default function WinnerSection() {
+  const winner = useAtomValue(winnerAtom);
+  const removeItem = useSetAtom(removeItemAtom);
 
   const [ copied, setCopied ] = useState(false);
 
@@ -29,18 +32,18 @@ function WinnerSection() {
   return (
     <div className="panel-section">
       <div className="flex w-full rounded-md bg-violet-500 shadow">
-        <div className="flex space-x-1 py-3 px-2 h-full w-20">
+        <div className="flex space-x-1 py-3 px-2 h-full w-32">
           <Badges item={winner} size={20} />
         </div>
         <span
-          className="p-3 w-full text-white cursor-pointer hover:animate-pulse select-none"
+          className="p-3 w-full truncate text-white cursor-pointer hover:animate-pulse select-none"
           onClick={copyNickname}
         >
           {displayName}
         </span>
         <button
           className="p-2 px-4 text-white hover:scale-110"
-          onClick={() => store.session.removeItem(winner.label)}
+          onClick={() => removeItem(winner.label)}
         >
           <FaTrash/>
         </button>
@@ -48,5 +51,3 @@ function WinnerSection() {
     </div>
   );
 }
-
-export default observer(WinnerSection);

@@ -6,11 +6,13 @@ import VideoBackground from '../components/VideoBackground';
 
 import Wheel from '../components/Wheel';
 import Panel from '../components/ui/Panel';
+import TwitchLoader from '../components/ui/TwitchLoader';
 
 export default function Index() {
   return (
     <div className="flex w-screen h-screen font-bold">
       <Panel />
+      <TwitchLoader />
       <Suspense fallback={null}>
         <Canvas className="w-screen h-screen">
           <Wheel />
