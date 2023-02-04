@@ -5,7 +5,7 @@ import { damp3 } from 'maath/easing';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 import {
   GenerateSectorGeometryData
