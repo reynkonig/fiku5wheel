@@ -17,7 +17,6 @@ function Badges({ item, size }: IItemBadgesProps) {
     <>{item.userstate ? (
       Object.entries(item.userstate.badges ?? {}).map(([ name, payload ]) => {
         return (
-          // eslint-disable-next-line @next/next/no-img-element
           <Image
             key={name}
             className="p-0.5 aspect-square h-5 w-5"
