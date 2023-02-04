@@ -5,7 +5,7 @@ import { observer } from 'mobx-react';
 
 import store from '../../common/stores/Store';
 
-import { IBadges, IListedItem } from '../../common/Interfaces';
+import { IListedItem } from '../../common/Interfaces';
 
 import { FaTrash } from 'react-icons/fa';
 import Badges from './Badges';
@@ -14,7 +14,6 @@ import Badges from './Badges';
 
 interface IListItemProps {
   item: IListedItem;
-  badges: IBadges;
 }
 
 export function getDisplayName (item: IListedItem) {
@@ -32,7 +31,8 @@ export function getDisplayName (item: IListedItem) {
   return item.label;
 }
 
-function ListItem({ item, badges } : IListItemProps) {
+function ListItem({ item } : IListItemProps) {
+  const { badges } = store.content;
   const [ copied, setCopied ] = useState(false);
 
   const copyLabel = async () => {

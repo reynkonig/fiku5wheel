@@ -1,3 +1,5 @@
+import useSWR from 'swr';
+import axios from 'axios';
 import { observer } from 'mobx-react';
 
 import store from '../../common/stores/Store';
@@ -15,12 +17,22 @@ import { IBadges } from '../../common/Interfaces';
 
 import TwitchLoader from './TwitchLoader';
 import WinnerSection from './WinnerSection';
+import { useEffect } from 'react';
 
+
+const fetcher = (url: string) => axios.get(url).then((response) => response.data);
 
 function Panel() {
-  const { badges } = store.content;
-  const { maxLabelsCount } = store.settings;
+  const { maxLabelsCount, channel } = store.settings;
   const { ready, items, winner, joinMessage } = store.session;
+
+  const { data: badges } = useSWR<IBadges>(`/api/badges/${channel}`, fetcher);
+
+  useEffect(() => {
+    if(badges !== undefined) {
+      store.content.setBadges(badges);
+    }
+  }, [ badges ]);
 
   return (
     <div
@@ -74,7 +86,6 @@ function Panel() {
               <ListItem
                 key={item.label}
                 item={item}
-                badges={badges as IBadges}
               />
             )
           )}
