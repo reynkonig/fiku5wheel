@@ -1,12 +1,10 @@
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import { IBadgesImageSets } from '../../../common/Interfaces';
-
-const DEFAULT_CHANNEL = 'dazzlingmoonmakesmysmile';
+import { IBadges } from '../../../common/Interfaces';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const badges: IBadgesImageSets = { global: [], local: [] };
+  const badges: IBadges = { global: [], local: [] };
 
   const { channel } = req.query;
 

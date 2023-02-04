@@ -1,25 +1,25 @@
 import * as THREE from 'three';
 import { damp3 } from 'maath/easing';
 import { useEffect, useRef, useState } from 'react';
-import { Text } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
 import { observer } from 'mobx-react';
+import { useFrame } from '@react-three/fiber';
 
 import {
   GenerateSectorGeometryData
 } from '../common/geometry/GenerateSectorGeometryData';
 
+import store from '../common/stores/Store';
+
 import Sector from './Sector';
 import Pointer from './Pointer';
 import OuterRing from './OuterRing';
-
-import store from '../common/stores/Store';
+import WinnerText from './WinnerText';
 
 
 
 function Wheel({ ...props }: { [p: string]: any }) {
 
-  const { neverEmptyLabels } = store.session;
+  const { labels } = store.wheel;
   const { palette, geometry } = store.settings;
 
   const [ hovered, setHovered ] = useState<boolean>(false);
@@ -33,6 +33,8 @@ function Wheel({ ...props }: { [p: string]: any }) {
   const rotatablePartRef = useRef<THREE.Group>(null!);
   const totalTransformRef = useRef<THREE.Group>(null!);
 
+  const getCurrentAngle = () => (360 - (rotatablePartRef.current.rotation.z * 180 / Math.PI));
+
   useEffect(() => {
     document.body.style.cursor = hovered ? 'pointer' : 'auto';
   }, [hovered])
@@ -41,7 +43,7 @@ function Wheel({ ...props }: { [p: string]: any }) {
     if (sectorGeometryRef.current) {
       const geometryData = GenerateSectorGeometryData({
         radius: geometry.radius,
-        angle: 360 / neverEmptyLabels.length,
+        angle: 360 / labels.length,
         resolution: 3,
         depth: geometry.thickness
       });
@@ -51,14 +53,10 @@ function Wheel({ ...props }: { [p: string]: any }) {
 
       sectorGeometryRef.current.attributes.position.needsUpdate = true;
 
-      if(sectorGeometryRef.current.index !== null) {
-        sectorGeometryRef.current.index.needsUpdate = true;
-      }
-
       sectorGeometryRef.current.computeBoundingBox();
       sectorGeometryRef.current.computeBoundingSphere();
     }
-  }, [ geometry, neverEmptyLabels ]);
+  }, [ geometry, labels ]);
 
   useFrame((state, delta) => {
     if (totalTransformRef.current) {
@@ -70,17 +68,7 @@ function Wheel({ ...props }: { [p: string]: any }) {
       rotatablePartRef.current.rotateZ(-store.wheel.velocity * delta);
 
       if(store.wheel.localProgress >= 1) {
-        store.wheel.switchToNextSpinState();
-      }
-    }
-    else {
-      const angle = 360 - (rotatablePartRef.current.rotation.z * 180 / Math.PI);
-      const stepAngle = 360 / neverEmptyLabels.length;
-      const i = Math.abs(Math.floor((angle + stepAngle / 2) / stepAngle));
-      const winner = neverEmptyLabels[i >= neverEmptyLabels.length ? i - neverEmptyLabels.length : i];
-
-      if(winner !== store.session.winner) {
-        store.session.setWinner(winner);
+        store.wheel.switchToNextSpinState(getCurrentAngle());
       }
     }
 
@@ -95,25 +83,12 @@ function Wheel({ ...props }: { [p: string]: any }) {
       onPointerOver={() => setHovered(true)}
       onPointerLeave={() => setHovered(false)}
       onClick={(event) => {
-        store.wheel.switchSpinState();
+        store.wheel.switchSpinState(getCurrentAngle());
         event.stopPropagation();
       } }
       {...props}
     >
-      {
-        store.wheel.spinStateIndex === 0 ? (
-        <Text
-          anchorX="center"
-          anchorY="middle"
-          fontSize={0.2}
-          color={store.session.winner.userstate?.color ?? 'white'}
-          outlineWidth={0.005}
-          position={[0, 0, 0.5]}
-        >
-          {store.session.winner.label}
-        </Text>
-        ) : null
-      }
+      <WinnerText />
       <Pointer
         material={outlineMaterialRef.current}
         position={[-geometry.radius, 0, geometry.thickness]}
@@ -135,10 +110,10 @@ function Wheel({ ...props }: { [p: string]: any }) {
         />
       </mesh>
       <group name="sectors" ref={rotatablePartRef}>{
-        neverEmptyLabels.map((item, i) => (
+        labels.map((label, i) => (
             <Sector
-              key={item.label}
-              label={item.label}
+              key={label}
+              label={label}
               geometry={sectorGeometryRef.current}
               material={
                 i === 0
@@ -149,7 +124,7 @@ function Wheel({ ...props }: { [p: string]: any }) {
                       : sectorMaterialBRef.current
                   )
               }
-              rotation={[0, 0, i * 360 / neverEmptyLabels.length * Math.PI / 180]}
+              rotation={[0, 0, i * 360 / labels.length * Math.PI / 180]}
             />
           ))
         }</group >

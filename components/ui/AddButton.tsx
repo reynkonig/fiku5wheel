@@ -17,7 +17,7 @@ function AddButton() {
   const validLabel = label.length !== 0;
 
   const addLabel = () => {
-    store.session.addLabel(label);
+    store.session.addItem(label);
     setLabel('');
     setActive(false);
   }
@@ -49,7 +49,7 @@ function AddButton() {
         <input
           ref={inputRef}
           className="text-black px-2 py-2 w-full rounded-md outline-none text-xl w-72"
-          placeholder="Новый участник"
+          placeholder="Текст..."
           value={label}
           onChange={handleInput}
           onKeyDown={(e) => {

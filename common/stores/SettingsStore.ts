@@ -7,12 +7,12 @@ import {
 } from '../Interfaces';
 
 export default class SettingsStore {
-  private root: Store;
   public channel: string;
   public maxLabelsCount: number;
   public geometry: IWheelGeometrySettings;
   public palette: IWheelColorPalette;
   public spinning: ISpinSettings;
+  private root: Store;
 
   constructor(root: Store) {
     this.root = root;
