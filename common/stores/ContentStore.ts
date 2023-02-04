@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 
 import { IBadges } from '../Interfaces';
@@ -6,24 +5,20 @@ import { IBadges } from '../Interfaces';
 import { Store } from './Store';
 
 
-export class ContentStore {
+export default class ContentStore {
   private _badges: IBadges | undefined;
-  private _root: Store;
+  private root: Store;
 
   constructor(root: Store) {
-    this._root = root;
+    this.root = root;
 
     this._badges = undefined;
 
     makeAutoObservable(this, {}, {});
   }
 
-  public async loadAll() {
-    const { channel } = this._root.settings;
-
-    const response = await axios({ method: 'get', url: `/api/badges/${channel}`, params: { channel }})
-
-    this._badges = response.data;
+  public setBadges(badges: IBadges) {
+    this._badges = badges;
   }
 
   public get badges(): IBadges {

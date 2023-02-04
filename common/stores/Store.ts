@@ -1,9 +1,9 @@
 import { autorun } from 'mobx';
 
 import WheelStore from './WheelStore';
+import ContentStore from './ContentStore';
 import SessionStore from './SessionStore';
 import SettingsStore from './SettingsStore';
-import { ContentStore } from './ContentStore';
 
 export class Store {
 
@@ -21,8 +21,6 @@ export class Store {
 }
 
 const store = new Store();
-
-store.content.loadAll().then();
 
 autorun(async () => {
   const { channel } = store.settings;

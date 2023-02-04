@@ -12,9 +12,9 @@ const EMPTY_ITEM: IListedItem = { label: '' };
 
 export default class SessionStore {
   public items: IListedItem[];
-  public joinUsersFromChat: boolean = false;
-  public joinMessage: string = "";
-  public connected: boolean = false;
+  public joinUsersFromChat: boolean;
+  public joinMessage: string;
+  public connected: boolean;
   public currentChannel: string;
 
   private client: Client;
@@ -25,12 +25,15 @@ export default class SessionStore {
 
     this.client = new Client({});
 
-    this.client.on('message', this.onMessageHandler);
+    this.client.on('message', (...args) => this.onMessageHandler(...args));
     this.client.connect().then(() => this.setConnected(true));
 
     this.items = [];
 
     this.currentChannel = '';
+    this.joinMessage = '';
+    this.connected = false;
+    this.joinUsersFromChat = false;
 
     makeAutoObservable(this, {}, { deep: true });
   }
@@ -58,7 +61,8 @@ export default class SessionStore {
     ;
   }
 
-  public onMessageHandler(channel: string, userstate: Userstate, message: string) {
+  public onMessageHandler(channel: string, userstate: Userstate, message: string, self: boolean) {
+    console.log(this.joinMessage);
     if(!this.joinUsersFromChat) {
       return;
     }
