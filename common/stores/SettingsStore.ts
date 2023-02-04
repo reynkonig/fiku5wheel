@@ -17,7 +17,7 @@ export default class SettingsStore {
   constructor(root: Store) {
     this.root = root;
 
-    this.channel = 'fiku5golubev';
+    this.channel = 'lvndmark';
 
     this.maxLabelsCount = 256;
 
