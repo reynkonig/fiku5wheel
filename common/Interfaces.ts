@@ -22,12 +22,12 @@ export interface IWheelGeometrySettings {
   resolution: number;
 }
 
-export interface ILabeledItem {
+export interface IListedItem {
   label: string;
   userstate?: Userstate;
 }
 
-export interface IBadgesImageSets {
+export interface IBadges {
   global: IBadgeSet[];
   local: IBadgeSet[];
 }
@@ -55,4 +55,9 @@ export interface ISpinSettings {
   duration: number;
   maxVelocity: number;
   states: ISpinStateSettings[];
+}
+
+export interface IFetchProp<T> {
+  data: T | undefined;
+  loaded: boolean;
 }

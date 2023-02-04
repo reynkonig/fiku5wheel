@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer components {
+    .panel-container {
+        @apply flex absolute w-full h-full rounded-lg;
+    }
+
     .panel-section {
         @apply flex space-x-2 text-sm;
     }

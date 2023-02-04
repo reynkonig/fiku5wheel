@@ -1,95 +1,120 @@
+import _ from 'lodash';
+import { ratio } from 'fuzzball';
 import { makeAutoObservable } from 'mobx';
 import { Client, Userstate } from 'tmi.js';
-import { ratio } from 'fuzzball';
 
-import { ILabeledItem } from '../Interfaces';
+import { IListedItem } from '../Interfaces';
 
 import { Store } from './Store';
 
+
+const EMPTY_ITEM: IListedItem = { label: '' };
+
 export default class SessionStore {
-  public labeledItems: ILabeledItem[];
-  public open: boolean;
-  public ready: boolean;
-  public winner: ILabeledItem;
-  public joinMessage: string;
-  private twitchClient: Client | null
+  public items: IListedItem[];
+  public joinUsersFromChat: boolean = false;
+  public joinMessage: string = "";
+  public connected: boolean = false;
+  public currentChannel: string;
+
+  private client: Client;
   private root: Store;
 
   constructor(root: Store) {
     this.root = root;
 
-    this.labeledItems = Array.from('ABCDEFG').map(
-      (val) => ({ label: val })
-    );
+    this.client = new Client({});
 
-    this.open = false;
-    this.ready = false;
-    this.winner = { label: '' };
+    this.client.on('message', this.onMessageHandler);
+    this.client.connect().then(() => this.setConnected(true));
 
-    this.joinMessage = "";
+    this.items = [];
 
-    this.twitchClient = null;
+    this.currentChannel = '';
 
     makeAutoObservable(this, {}, { deep: true });
   }
 
-  public get neverEmptyLabels () {
-    return this.labeledItems.length > 0
-      ? this.labeledItems
-      : [{ label: '' }]
+  public get inChannel() {
+    return !_.isEmpty(this.currentChannel);
+  }
+
+  public get ready(): boolean {
+    return this.connected && this.inChannel;
+  }
+
+  public get winner(): IListedItem | undefined {
+    return this.items.find((item) => item.label === this.root.wheel.winnerLabel);
+  }
+
+  public get isItemsEmpty(): boolean {
+    return this.items.length === 0;
+  }
+
+  public get neverEmptyItems (): IListedItem[] {
+    return this.items.length > 0
+      ? this.items
+      : [EMPTY_ITEM]
     ;
   }
 
-  private setReady() {
-    this.ready = true;
-  }
+  public onMessageHandler(channel: string, userstate: Userstate, message: string) {
+    if(!this.joinUsersFromChat) {
+      return;
+    }
 
-  async joinChannel(channel: string) {
-    if(this.twitchClient === null) {
-      this.twitchClient = new Client({ channels: [channel] });
+    const messageMatch =  ratio(message, this.joinMessage) >= 0.6 || _.isEmpty(this.joinMessage);
 
-      await this.twitchClient.connect();
-
-      this.twitchClient.on('message', (channel, userstate, message, self) => {
-        if(!this.open) {
-          return;
-        }
-        const matchPercent = ratio(this.joinMessage, message);
-
-        if((matchPercent >= 60 || this.joinMessage === '') && userstate?.username) {
-          this.addLabel(userstate.username, userstate);
-        }
-      });
-
-      this.setReady();
+    if(messageMatch) {
+      this.addItem(userstate.username, userstate);
     }
   }
 
-  setWinner(label: ILabeledItem) {
-    this.winner = label;
+  public setConnected(state: boolean) {
+    this.connected = state;
   }
 
-  setJoinMessage(message: string) {
+  public setCurrentChannel(channel: string) {
+    this.currentChannel = channel;
+  }
+
+  public async joinChannel(channel: string) {
+    if(_.isEmpty(channel) || !this.connected) {
+      return;
+    }
+
+    if(this.inChannel) {
+      await this.client.part(this.currentChannel);
+    }
+
+    await this.client.join(channel);
+    this.setCurrentChannel(channel);
+  }
+
+  public setJoinMessage(message: string): void {
     this.joinMessage = message;
   }
 
-  addLabel(label: string, userstate?: Userstate) {
-    const alreadyInclude = this.labeledItems.filter((item) => item.label === label).length > 0;
-    const limitReached = this.labeledItems.length >= this.root.settings.maxLabelsCount;
+  public addItem(label: string, userstate?: Userstate): void {
+    const alreadyInclude = this.items.filter((item) => item.label === label).length > 0;
+    const limitReached = this.items.length >= this.root.settings.maxLabelsCount;
     if(!limitReached && !alreadyInclude) {
-      this.labeledItems = [...this.labeledItems, { label, userstate }];
+      this.items = [...this.items, { label, userstate }];
     }
   }
 
-  removeLabel(label: string) {
-    this.labeledItems = this.labeledItems.filter((val) => (val.label !== label));
+  public removeItem(label: string): void {
+    this.items = this.items.filter((val) => (val.label !== label));
+    if(label === this.root.wheel.winnerLabel) {
+      this.root.wheel.setWinner();
+    }
   }
 
-  clearLabels() {
-    this.labeledItems = [];
+  public clearItems(): void {
+    this.items = [];
   }
 
-  switchOpen() {
-    this.open = !this.open;
+  public switchJoinAccess(): void {
+    this.joinUsersFromChat = !this.joinUsersFromChat;
   }
 }
