@@ -9,7 +9,7 @@ import { IBadges } from '../../common/Interfaces';
 
 import { channelAtom } from '../../atoms/SettingsAtoms';
 import {
-  clientAtom,
+  twitchClientAtom,
   canJoinAtom,
   connectedAtom,
   joinMessageAtom,
@@ -24,7 +24,7 @@ import { badgesAtom } from '../../atoms/ContentAtoms';
 
 
 export default function TwitchLoader() {
-  const client = useAtomValue(clientAtom);
+  const twitchClient = useAtomValue(twitchClientAtom);
   const channel = useAtomValue(channelAtom);
   const canJoin = useAtomValue(canJoinAtom);
   const joinMessage = useAtomValue(joinMessageAtom);
@@ -47,19 +47,19 @@ export default function TwitchLoader() {
 
   useEffect(() => {
     if(!connected) {
-      client.connect().then(() => {
+      twitchClient.connect().then(() => {
         setConnected(true);
       });
     }
-  }, [client, connected, setConnected ]);
+  }, [twitchClient, connected, setConnected ]);
 
   useEffect(() => {
     if(joinedChannel !== channel && !_.isEmpty(channel) && connected) {
-      client.join(channel).then(() => {
+      twitchClient.join(channel).then(() => {
         setJoinedChannel(channel);
       });
     }
-  }, [client, connected, channel, joinedChannel, setJoinedChannel])
+  }, [twitchClient, connected, channel, joinedChannel, setJoinedChannel])
 
   useEffect(() => {
     const messageHandler = (channel: string, userstate: Userstate, message: string) => {
@@ -74,12 +74,12 @@ export default function TwitchLoader() {
       }
     };
 
-    client.on('message', messageHandler);
+    twitchClient.on('message', messageHandler);
 
     return () => {
-      client.removeListener('message', messageHandler);
+      twitchClient.removeListener('message', messageHandler);
     }
-  }, [client, joinMessage, canJoin, addItem])
+  }, [twitchClient, joinMessage, canJoin, addItem])
 
   return (
     <div
