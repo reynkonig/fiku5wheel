@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import {  useAtomValue } from 'jotai';
 
-import { IListedItem } from '../../common/Interfaces';
+import { IListedItem } from '../../common/interfaces';
 
 import { badgesAtom } from '../../atoms/ContentAtoms';
 

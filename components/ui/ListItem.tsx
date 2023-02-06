@@ -4,7 +4,7 @@ import { ratio } from 'fuzzball';
 import { useState } from 'react';
 import { useSetAtom } from 'jotai';
 
-import { IListedItem } from '../../common/Interfaces';
+import { IListedItem } from '../../common/interfaces';
 
 import { removeItemAtom } from '../../atoms/ItemAtoms';
 

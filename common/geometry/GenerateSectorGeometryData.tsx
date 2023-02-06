@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { IMeshGeometryData } from '../Interfaces';
+import { IMeshGeometryData } from '../interfaces';
 
 const SECTOR_ANGLE_OFFSET = -90;
 

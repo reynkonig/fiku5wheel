@@ -1,7 +1,7 @@
 import {
   IMeshGeometryData,
   IWheelGeometrySettings,
-} from '../Interfaces';
+} from '../interfaces';
 
 const TRIANGLES_PER_LOOP = 4;
 
