@@ -13,9 +13,10 @@ export interface IItemBadgesProps {
 export default function Badges({ item, size }: IItemBadgesProps) {
   const badges = useAtomValue(badgesAtom);
 
-  const getBadgeSource = (name: string, versionId?: string) => {
-    for (const source of [ badges.local, badges.global ]) {
-      const matchSet = source.find((set) => set.set_id === name);
+  const getBadgeSource = (channel: string, name: string, versionId?: string) => {
+    const orderedSets = [ badges?.[channel] ?? [], badges.global ];
+    for (const orderedSet of orderedSets) {
+      const matchSet = orderedSet.find((set) => set.set_id === name);
       if (matchSet) {
         if (versionId) {
           const version = matchSet.versions.find((version) => version.id === versionId);
@@ -39,7 +40,7 @@ export default function Badges({ item, size }: IItemBadgesProps) {
           <Image
             key={name}
             className="p-0.5 aspect-square h-5 w-5"
-            src={getBadgeSource(name, payload)}
+            src={getBadgeSource(item.channel as string, name, payload)}
             alt={name}
             width={size}
             height={size}

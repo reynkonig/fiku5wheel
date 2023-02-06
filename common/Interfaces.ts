@@ -1,4 +1,5 @@
 import { Userstate } from 'tmi.js';
+import { ChannelState } from './emums';
 
 export interface IMeshGeometryData {
   vertices: number[];
@@ -24,12 +25,8 @@ export interface IWheelGeometrySettings {
 
 export interface IListedItem {
   label: string;
+  channel?: string;
   userstate?: Userstate;
-}
-
-export interface IBadges {
-  global: IBadgeSet[];
-  local: IBadgeSet[];
 }
 
 export interface IBadgeSet {
@@ -56,3 +53,4 @@ export interface ISpinSettings {
   maxVelocity: number;
   stages: ISpinStageSettings[];
 }
+

@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
 
-import { IBadges } from '../common/Interfaces';
+import { IBadgeSet } from '../common/Interfaces';
 
-export const badgesAtom = atom<IBadges>({ local: [], global: []})
+export const badgesAtom = atom<{ global: IBadgeSet[] } & Record<string, IBadgeSet[]>>({ global: []})

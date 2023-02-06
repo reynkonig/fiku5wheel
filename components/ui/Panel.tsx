@@ -3,8 +3,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { maxItemsCountAtom } from '../../atoms/SettingsAtoms';
 import { clearItemsAtom, itemsAtom, winnerAtom } from '../../atoms/ItemAtoms';
 import {
-  readyAtom,
-  canJoinAtom,
+  chatMembersCanJoinAtom,
   joinMessageAtom
 } from '../../atoms/SessionAtoms';
 
@@ -12,7 +11,6 @@ import {
 import ListItem from './ListItem';
 import AddButton from './AddButton';
 
-import TwitchLoader from './TwitchLoader';
 import WinnerSection from './WinnerSection';
 
 import {
@@ -22,14 +20,13 @@ import {
 } from 'react-icons/fa';
 
 export default function Panel() {
-  const ready = useAtomValue(readyAtom);
   const maxItemsCount = useAtomValue(maxItemsCountAtom);
 
   const clearItems = useSetAtom(clearItemsAtom);
 
   const items = useAtomValue(itemsAtom);
   const winner = useAtomValue(winnerAtom);
-  const [ canJoin, setCanJoin ] = useAtom(canJoinAtom);
+  const [ chatMembersCanJoin, setCanJoin ] = useAtom(chatMembersCanJoinAtom);
   const [ joinMessage , setJoinMessage ] = useAtom(joinMessageAtom);
 
 
@@ -40,11 +37,10 @@ export default function Panel() {
         height: "calc(100vh - 2.25rem)"
       }}
     >
-      <TwitchLoader />
-      <div className={`panel-container flex-col py-2 px-2 space-y-2 shadow bg-white bg-opacity-25 ${ready ? '' : 'overflow-hidden'}`}>
+      <div className='panel-container flex-col py-2 px-2 space-y-2 shadow bg-white bg-opacity-25 rounded-lg'>
         <div className="panel-section">
           <input
-            disabled={canJoin}
+            disabled={chatMembersCanJoin}
             className="rounded-md w-full outline-none px-2 pt-px bg-opacity-40"
             placeholder="Слово для участия"
             onChange={(e) => {
@@ -53,10 +49,10 @@ export default function Panel() {
             value={joinMessage}
           />
           <button
-            className={`text-white px-4 rounded-md text-xs aspect-square hovered-anim ${!canJoin ? 'bg-green-500' : 'bg-red-500'}`}
+            className={`text-white px-4 rounded-md text-xs aspect-square hovered-anim ${!chatMembersCanJoin ? 'bg-green-500' : 'bg-red-500'}`}
             onClick={() => setCanJoin(prev => !prev)}
           >
-            { canJoin
+            { chatMembersCanJoin
               ? <FaLockOpen className="scale-125" />
               : <FaLock className="scale-125" />
             }
