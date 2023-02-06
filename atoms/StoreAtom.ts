@@ -1,12 +1,12 @@
-import axios from 'axios';
 import _ from 'lodash';
+import axios from 'axios';
 import { ratio } from 'fuzzball';
 import { Client, Userstate } from 'tmi.js';
 
 import { createStore } from 'jotai';
 
 import { ChannelState } from '../common/emums';
-import { IListedItem } from '../common/interfaces';
+import { IBadgeSet } from '../common/interfaces';
 
 import {
   clientAtom,
@@ -27,7 +27,7 @@ store.sub(storeUIDAtom, () => {
   const storeUID = store.get(storeUIDAtom);
   window.LastStoreUID = storeUID;
 
-  const client = new Client({ channels: ['watchmeforever'] });
+  const client = new Client({});
 
   client.on('message', (channel: string, userstate: Userstate, message: string) => {
     if(window.LastStoreUID !== storeUID) {
@@ -42,18 +42,15 @@ store.sub(storeUIDAtom, () => {
     const joinMember = ratio(message, joinMessage) > 0.6 || joinMessage === '';
 
     if(joinMember) {
-      store.set(itemsAtom, (prev) => {
-        const newItem: IListedItem = { label: userstate.username, channel, userstate }
-        if(!prev.includes(newItem)) {
-          return [...prev, newItem];
-        }
-        return prev;
-      })
+      store.set(itemsAtom, (prev) => _.uniqBy([...prev, { label: userstate.username, channel, userstate }], 'label'))
     }
   })
 
   client.connect().then(() => {
     store.set(clientConnectedAtom, true);
+    store.set(channelStatesAtom, {
+      'fiku5golubev': ChannelState.JoinPlanned,
+    });
   })
 
   store.set(clientAtom, client);
@@ -77,7 +74,7 @@ store.sub(channelStatesAtom, () => {
             console.log(`Joined ${channel}`);
             set(channelStatesAtom, (prev) => _.set(_.cloneDeep(prev), channel, ChannelState.Joined));
 
-            axios.get(`/api/badges/${channel}`).then((response) => {
+            axios.get<Record<string, IBadgeSet[]>>(`/api/badges/${channel}`).then((response) => {
               set(badgesAtom, (prev) => _.merge(_.cloneDeep(prev), response.data));
             })
           });
@@ -102,6 +99,7 @@ store.sub(channelStatesAtom, () => {
 
 if(typeof window !== 'undefined') {
   store.set(storeUIDAtom, crypto.randomUUID());
+  axios.get('/api/badges').then((response) => store.set(badgesAtom, response.data));
 }
 
 export default store;

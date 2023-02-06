@@ -13,10 +13,10 @@ export interface IItemBadgesProps {
 export default function Badges({ item, size }: IItemBadgesProps) {
   const badges = useAtomValue(badgesAtom);
 
-  const getBadgeSource = (channel: string, name: string, versionId?: string) => {
-    const orderedSets = [ badges?.[channel] ?? [], badges.global ];
+  const getBadgeSource = (channel: string, badge: string, versionId?: string) => {
+    const orderedSets = badges?.[channel] ? [ badges[channel], badges.global ] : [ badges.global ];
     for (const orderedSet of orderedSets) {
-      const matchSet = orderedSet.find((set) => set.set_id === name);
+      const matchSet = orderedSet.find((set) => set.set_id === badge);
       if (matchSet) {
         if (versionId) {
           const version = matchSet.versions.find((version) => version.id === versionId);
