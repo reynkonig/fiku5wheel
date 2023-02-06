@@ -1,10 +1,10 @@
 import React from 'react';
 import Head from 'next/head';
+import { Analytics } from '@vercel/analytics/react';
+import { Comfortaa } from '@next/font/google'
+import type { AppProps } from 'next/app'
 
 import { Provider } from 'jotai';
-import { Comfortaa } from '@next/font/google'
-
-import type { AppProps } from 'next/app'
 
 import store from '../atoms/StoreAtom';
 
@@ -21,6 +21,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <main className={comfortaa.className}>
         <Component {...pageProps} />
       </main>
+      <Analytics />
     </Provider>
   );
 }
