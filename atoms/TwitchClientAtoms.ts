@@ -4,19 +4,19 @@ import { Client } from 'tmi.js';
 
 import { ChannelState } from '../common/emums';
 
-export const twitchClientAtom = atom<Client>(new Client({}));
-export const twitchClientConnectedAtom = atom<boolean>(false);
-export const twitchChannelStatesAtom = atom<Record<string, ChannelState>>({});
+export const clientAtom = atom<Client>(new Client({}));
+export const clientConnectedAtom = atom<boolean>(false);
+export const channelStatesAtom = atom<Record<string, ChannelState>>({});
 export const connectingChannelsAtom = atom<string[]>(
   (get) => {
     return _.keys(
-      _.pickBy(get(twitchChannelStatesAtom), (state) => state === ChannelState.Joining || state === ChannelState.JoinPlanned)
+      _.pickBy(get(channelStatesAtom), (state) => state === ChannelState.Joining || state === ChannelState.JoinPlanned)
     )
   }
 );
 
 export const readyAtom = atom<boolean>(
   (get) => {
-    return get(twitchClientConnectedAtom) && get(connectingChannelsAtom).length === 0;
+    return get(clientConnectedAtom) && get(connectingChannelsAtom).length === 0;
   }
 );

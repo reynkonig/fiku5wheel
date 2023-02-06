@@ -1,40 +1,81 @@
 import axios from 'axios';
 import _ from 'lodash';
-import { createStore } from 'jotai';
 import { ratio } from 'fuzzball';
+import { Client, Userstate } from 'tmi.js';
 
-import { Userstate } from 'tmi.js';
+import { createStore } from 'jotai';
+
 import { ChannelState } from '../common/emums';
+import { IListedItem } from '../common/interfaces';
 
-import { itemsAtom } from './ItemAtoms';
 import {
-  twitchClientAtom,
-  twitchChannelStatesAtom,
-  twitchClientConnectedAtom,
+  clientAtom,
+  channelStatesAtom,
+  clientConnectedAtom,
 } from './TwitchClientAtoms';
-import { chatMembersCanJoinAtom, joinMessageAtom } from './SessionAtoms';
 import { badgesAtom } from './ContentAtoms';
-
+import {
+  chatMembersCanJoinAtom,
+  joinMessageAtom,
+  storeUIDAtom
+} from './SessionAtoms';
+import { itemsAtom } from './ItemAtoms';
 
 const store = createStore();
 
-store.sub(twitchChannelStatesAtom, () => {
+store.sub(storeUIDAtom, () => {
+  const storeUID = store.get(storeUIDAtom);
+  window.LastStoreUID = storeUID;
+
+  const client = new Client({ channels: ['watchmeforever'] });
+
+  client.on('message', (channel: string, userstate: Userstate, message: string) => {
+    if(window.LastStoreUID !== storeUID) {
+      client.removeAllListeners().disconnect();
+    }
+
+    if(!store.get(chatMembersCanJoinAtom)) {
+      return;
+    }
+
+    const joinMessage = store.get(joinMessageAtom);
+    const joinMember = ratio(message, joinMessage) > 0.6 || joinMessage === '';
+
+    if(joinMember) {
+      store.set(itemsAtom, (prev) => {
+        const newItem: IListedItem = { label: userstate.username, channel, userstate }
+        if(!prev.includes(newItem)) {
+          return [...prev, newItem];
+        }
+        return prev;
+      })
+    }
+  })
+
+  client.connect().then(() => {
+    store.set(clientConnectedAtom, true);
+  })
+
+  store.set(clientAtom, client);
+})
+
+store.sub(channelStatesAtom, () => {
   const { get, set } = store;
-  const connected = get(twitchClientConnectedAtom);
-  const channelStates = get(twitchChannelStatesAtom);
+  const connected = get(clientConnectedAtom);
+  const channelStates = get(channelStatesAtom);
 
   const pendingStates = _.pickBy(channelStates, (value) => value === ChannelState.JoinPlanned || value === ChannelState.PartPlanned);
 
   if(connected && !_.isEmpty(pendingStates)) {
     const newStates = _.mapValues(channelStates, (state, channel) => {
-      const twitchClient = get(twitchClientAtom);
+      const twitchClient = get(clientAtom);
 
       switch (state) {
         case ChannelState.JoinPlanned:
           console.log(`Joining ${channel}`);
           twitchClient.join(channel).then(() => {
             console.log(`Joined ${channel}`);
-            set(twitchChannelStatesAtom, (prev) => _.set(_.cloneDeep(prev), channel, ChannelState.Joined));
+            set(channelStatesAtom, (prev) => _.set(_.cloneDeep(prev), channel, ChannelState.Joined));
 
             axios.get(`/api/badges/${channel}`).then((response) => {
               set(badgesAtom, (prev) => _.merge(_.cloneDeep(prev), response.data));
@@ -46,7 +87,7 @@ store.sub(twitchChannelStatesAtom, () => {
           console.log(`Parting ${channel}`);
           twitchClient.part(channel).then(() => {
             console.log(`Parted ${channel}`);
-            set(twitchChannelStatesAtom, (prev) => _.pickBy(_.cloneDeep(prev), (value, key) => key !== channel));
+            set(channelStatesAtom, (prev) => _.pickBy(_.cloneDeep(prev), (value, key) => key !== channel));
           });
           return ChannelState.Parting;
 
@@ -55,26 +96,13 @@ store.sub(twitchChannelStatesAtom, () => {
       }
     });
 
-    set(twitchChannelStatesAtom, newStates as Record<string, ChannelState>);
+    set(channelStatesAtom, newStates as Record<string, ChannelState>);
   }
 })
 
-const client = store.get(twitchClientAtom);
-
-client.on('message', (channel: string, userstate: Userstate, message: string) => {
-  if(!store.get(chatMembersCanJoinAtom)) {
-    return;
-  }
-
-  const joinMessage = store.get(joinMessageAtom);
-
-  const messageMatch = (ratio(message, joinMessage) >= 0.60) || joinMessage === '';
-
-  if(messageMatch) {
-    if(store.get(itemsAtom).find((item) => item.label === userstate.username) === undefined) {
-      store.set(itemsAtom, (prev) => [...prev, { label: userstate.username, channel: channel.substring(1), userstate }])
-    }
-  }
-})
+if(typeof window !== 'undefined') {
+  store.set(storeUIDAtom, crypto.randomUUID());
+}
 
 export default store;
+

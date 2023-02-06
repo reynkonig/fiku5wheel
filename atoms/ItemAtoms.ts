@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 
-import { IListedItem } from '../common/Interfaces';
+import { IListedItem } from '../common/interfaces';
 
 export const itemsAtom = atom<IListedItem[]>(
   [{ label: 'A' }, { label: 'B' }, { label: 'C' }],

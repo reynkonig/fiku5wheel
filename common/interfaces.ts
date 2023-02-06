@@ -1,5 +1,4 @@
 import { Userstate } from 'tmi.js';
-import { ChannelState } from './emums';
 
 export interface IMeshGeometryData {
   vertices: number[];

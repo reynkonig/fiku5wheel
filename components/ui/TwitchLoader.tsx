@@ -4,7 +4,7 @@ import { useAtomValue } from 'jotai';
 import {
   readyAtom,
   connectingChannelsAtom,
-  twitchClientConnectedAtom, twitchChannelStatesAtom,
+  clientConnectedAtom,
 } from '../../atoms/TwitchClientAtoms';
 
 import { FaTwitch } from 'react-icons/fa';
@@ -12,7 +12,7 @@ import { FaTwitch } from 'react-icons/fa';
 export default function TwitchLoader() {
   const ready = useAtomValue(readyAtom);
 
-  const connected = useAtomValue(twitchClientConnectedAtom);
+  const connected = useAtomValue(clientConnectedAtom);
   const connectingChannels = useAtomValue(connectingChannelsAtom);
 
   return (

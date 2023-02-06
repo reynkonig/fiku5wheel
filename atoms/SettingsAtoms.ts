@@ -4,7 +4,7 @@ import {
   ISpinSettings,
   IWheelColorPalette,
   IWheelGeometrySettings
-} from '../common/Interfaces';
+} from '../common/interfaces';
 
 export const maxItemsCountAtom = atom<number>(256);
 export const geometrySettingsAtom = atom<IWheelGeometrySettings>({
