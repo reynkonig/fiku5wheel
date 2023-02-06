@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import { IBadgeSet } from '../../../common/Interfaces';
+import { IBadgeSet } from '../../../common/interfaces';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { channel } = req.query;

@@ -1,7 +1,7 @@
 import {
   IMeshGeometryData,
   IWheelGeometrySettings,
-} from '../Interfaces';
+} from '../interfaces';
 
 export interface IGeneratePointerGeometryDataProps {
   geometrySettings: IWheelGeometrySettings;
