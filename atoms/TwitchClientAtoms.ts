@@ -1,22 +1,44 @@
 import _ from 'lodash';
-import { atom } from 'jotai';
-import { Client } from 'tmi.js';
+import axios from 'axios';
+import { ratio } from 'fuzzball';
+import { Userstate } from 'tmi.js';
 
-import { ChannelState } from '../common/emums';
+import { atomWithMachine } from 'jotai-xstate';
 
-export const clientAtom = atom<Client>(new Client({}));
-export const clientConnectedAtom = atom<boolean>(false);
-export const channelStatesAtom = atom<Record<string, ChannelState>>({});
-export const connectingChannelsAtom = atom<string[]>(
-  (get) => {
-    return _.keys(
-      _.pickBy(get(channelStatesAtom), (state) => state === ChannelState.Joining || state === ChannelState.JoinPlanned)
-    )
+import { createTwitchClientMachine } from '../machines/TwitchClientMachine';
+
+import store from './StoreAtom';
+
+import { itemsAtom } from './ItemAtoms';
+import { badgesAtom } from './ContentAtoms';
+import { channelsAtom } from './SettingsAtoms';
+import { chatMembersCanJoinAtom, joinMessageAtom } from './SessionAtoms';
+
+const messageHandler = (channel: string, userstate: Userstate, message: string) => {
+
+  if(!store.get(chatMembersCanJoinAtom)) {
+    return;
   }
-);
 
-export const readyAtom = atom<boolean>(
-  (get) => {
-    return get(clientConnectedAtom) && get(connectingChannelsAtom).length === 0;
+  const joinMessage = store.get(joinMessageAtom);
+  const joinMember = ratio(message, joinMessage) > 0.6 || joinMessage === '';
+
+  if(joinMember) {
+    store.set(itemsAtom, (prev) => _.uniqBy([...prev, { label: userstate.username, channel, userstate }], 'label'))
   }
+}
+const getChannelBadgesMethod = (channel: string) => {
+  if(_.isUndefined(store.get(badgesAtom)?.[channel])) {
+    axios.get(`/api/badges/${channel}`).then((response) => {
+      store.set(badgesAtom, (prev) => _.assign(_.cloneDeep(prev), response.data));
+    });
+  }
+}
+
+export const twitchClientMachineAtom = atomWithMachine((get) =>
+  createTwitchClientMachine({
+    channels: get(channelsAtom),
+    messageHandler,
+    getChannelBadgesMethod
+  })
 );

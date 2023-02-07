@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import {  useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 
 import { IListedItem } from '../../common/interfaces';
 
@@ -14,6 +14,7 @@ export default function Badges({ item, size }: IItemBadgesProps) {
   const badges = useAtomValue(badgesAtom);
 
   const getBadgeSource = (channel: string, badge: string, versionId?: string) => {
+    channel = channel.replace('#', '');
     const orderedSets = badges?.[channel] ? [ badges[channel], badges.global ] : [ badges.global ];
     for (const orderedSet of orderedSets) {
       const matchSet = orderedSet.find((set) => set.set_id === badge);

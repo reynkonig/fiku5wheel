@@ -6,6 +6,8 @@ import {
   IWheelGeometrySettings
 } from '../common/interfaces';
 
+
+export const channelsAtom = atom<string[]>([ 'fiku5golubev' ])
 export const maxItemsCountAtom = atom<number>(256);
 export const geometrySettingsAtom = atom<IWheelGeometrySettings>({
   radius: 2,

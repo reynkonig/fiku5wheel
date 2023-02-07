@@ -1,19 +1,14 @@
 import React from 'react';
-import { useAtomValue } from 'jotai';
+import { useAtom } from 'jotai';
 
-import {
-  readyAtom,
-  connectingChannelsAtom,
-  clientConnectedAtom,
-} from '../../atoms/TwitchClientAtoms';
+import { twitchClientMachineAtom } from '../../atoms/TwitchClientAtoms';
 
 import { FaTwitch } from 'react-icons/fa';
 
 export default function TwitchLoader() {
-  const ready = useAtomValue(readyAtom);
+  const [ state ] = useAtom(twitchClientMachineAtom);
 
-  const connected = useAtomValue(clientConnectedAtom);
-  const connectingChannels = useAtomValue(connectingChannelsAtom);
+  const ready = state.matches('ready');
 
   return (
     <div
@@ -30,11 +25,16 @@ export default function TwitchLoader() {
         <FaTwitch className="mx-auto text-6xl" />
         <div className="mx-auto h-8" />
         <div className="mt-10">
-          { connectingChannels.length || !connected ? (
-            <span>Подключение к&nbsp;
-              <b>{connected ? connectingChannels.join(', ') : 'irc-ws.chat.twitch.tv'}</b>
+          { !ready && (
+            <span>
+              Подключение к&nbsp;
+              <b>
+                {state.matches('disconnected') && ('irc-ws.chat.twitch.tv')}
+                {state.matches('joining') && (state.context.channels.join(', '))}
+              </b>
             </span>
-          ) : (
+          )}
+          { ready && (
             <span>Готово</span>
           )}
         </div>
