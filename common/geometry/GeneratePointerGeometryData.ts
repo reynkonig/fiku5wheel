@@ -1,13 +1,6 @@
-import {
-  IMeshGeometryData,
-  IWheelGeometrySettings,
-} from '../interfaces';
+import { MeshGeometryDataGenerator } from '../types';
 
-export interface IGeneratePointerGeometryDataProps {
-  geometrySettings: IWheelGeometrySettings;
-}
-
-export default function GeneratePointerGeometryData({ geometrySettings } : IGeneratePointerGeometryDataProps): IMeshGeometryData {
+const GeneratePointerGeometryData: MeshGeometryDataGenerator = (geometrySettings) => {
   const vertices: number[] = [];
 
   const length = geometrySettings.outerRingWidth + geometrySettings.textPadding / 2;
@@ -38,3 +31,5 @@ export default function GeneratePointerGeometryData({ geometrySettings } : IGene
 
   return { vertices, triangles };
 }
+
+export default GeneratePointerGeometryData;

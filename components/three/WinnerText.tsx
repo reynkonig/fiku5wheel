@@ -1,14 +1,15 @@
 import * as THREE from 'three';
-import { useRef } from 'react';
 import { damp } from 'maath/easing';
 
-import { useFrame } from '@react-three/fiber';
+import { useRef } from 'react';
 import { Text } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+
 import { useAtomValue } from 'jotai';
 
-import { winnerAtom } from '../atoms/ItemAtoms';
-import { isSpinningAtom } from '../atoms/SessionAtoms';
-import { geometrySettingsAtom } from '../atoms/SettingsAtoms';
+import { winnerAtom } from '../../atoms/ItemAtoms';
+import { isSpinningAtom } from '../../atoms/SessionAtoms';
+import { geometrySettingsAtom } from '../../atoms/SettingsAtoms';
 
 export default function WinnerText() {
   const textMaterialRef = useRef<THREE.MeshBasicMaterial>(null!);

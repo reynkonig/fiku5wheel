@@ -1,33 +1,35 @@
 import * as THREE from 'three';
+
 import { useEffect, useRef } from 'react';
+
 import { useAtomValue } from 'jotai';
 
-import GeneratePointerGeometryData
-  from '../common/geometry/GeneratePointerGeometryData';
+import { MeshGeometryDataGenerator } from '../../common/types';
 
-import { geometrySettingsAtom } from '../atoms/SettingsAtoms';
+import { geometrySettingsAtom } from '../../atoms/SettingsAtoms';
 
-export interface IPointerProps {
+
+interface IProceduralMeshProps {
   material: THREE.Material;
+  generator: MeshGeometryDataGenerator;
 }
 
-export default function Pointer({ material, ...props }: IPointerProps & { [p: string] : any }) {
+export default function ProceduralMesh({ generator, material }: IProceduralMeshProps & { [p: string]: any }) {
   const geometrySettings = useAtomValue(geometrySettingsAtom);
   const geometryRef = useRef(new THREE.BufferGeometry());
 
   useEffect(() => {
-    const geometryData = GeneratePointerGeometryData({ geometrySettings });
+    const geometryData = generator(geometrySettings);
 
     geometryRef.current.setAttribute('position', new THREE.Float32BufferAttribute(geometryData.vertices, 3));
     geometryRef.current.setIndex(geometryData.triangles as number[]);
 
-  }, [ geometrySettings ]);
+  }, [ generator, geometrySettings ]);
 
   return (
     <mesh
       material={material}
       geometry={geometryRef.current}
-      {...props}
     />
   );
 }

@@ -8,8 +8,8 @@ import {
   geometrySettingsAtom,
   maxItemsCountAtom,
   paletteAtom
-} from '../atoms/SettingsAtoms';
-import { itemsCountAtom } from '../atoms/ItemAtoms';
+} from '../../atoms/SettingsAtoms';
+import { itemsCountAtom } from '../../atoms/ItemAtoms';
 
 
 export interface ISectorProps {

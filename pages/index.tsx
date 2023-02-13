@@ -3,8 +3,8 @@ import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import { PerspectiveCamera } from '@react-three/drei';
 
-import Wheel from '../components/Wheel';
-import VideoBackground from '../components/VideoBackground';
+import Wheel from '../components/three/Wheel';
+import VideoBackground from '../components/three/VideoBackground';
 
 import Panel from '../components/ui/Panel';
 import TwitchLoader from '../components/ui/TwitchLoader';

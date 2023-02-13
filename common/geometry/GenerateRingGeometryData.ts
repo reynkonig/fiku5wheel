@@ -1,15 +1,8 @@
-import {
-  IMeshGeometryData,
-  IWheelGeometrySettings,
-} from '../interfaces';
+import { MeshGeometryDataGenerator } from '../types';
 
 const TRIANGLES_PER_LOOP = 4;
 
-export interface IGenerateRingGeometryDataProps {
-  geometrySettings: IWheelGeometrySettings;
-}
-
-export default function GenerateRingGeometryData({ geometrySettings }: IGenerateRingGeometryDataProps): IMeshGeometryData {
+const GenerateRingGeometryData: MeshGeometryDataGenerator = (geometrySettings) => {
   const vertices: number[] = [];
   const triangles: number[] = [];
 
@@ -55,3 +48,5 @@ export default function GenerateRingGeometryData({ geometrySettings }: IGenerate
 
   return { vertices, triangles };
 }
+
+export default GenerateRingGeometryData;

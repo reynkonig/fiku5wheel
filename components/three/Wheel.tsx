@@ -5,22 +5,27 @@ import { damp3 } from 'maath/easing';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
+
 import { useAtomValue, useSetAtom } from 'jotai';
 
 import {
   GenerateSectorGeometryData
-} from '../common/geometry/GenerateSectorGeometryData';
+} from '../../common/geometry/GenerateSectorGeometryData';
 
-import { itemLabelsAtom, winnerLabelAtom } from '../atoms/ItemAtoms';
+import { itemLabelsAtom, winnerLabelAtom } from '../../atoms/ItemAtoms';
 import {
   geometrySettingsAtom,
   paletteAtom, spinSettingsAtom,
-} from '../atoms/SettingsAtoms';
+} from '../../atoms/SettingsAtoms';
 
 import Sector from './Sector';
-import Pointer from './Pointer';
-import OuterRing from './OuterRing';
 import WinnerText from './WinnerText';
+import ProceduralMesh from './ProceduralMesh';
+
+import GenerateRingGeometryData
+  from '../../common/geometry/GenerateRingGeometryData';
+import GeneratePointerGeometryData
+  from '../../common/geometry/GeneratePointerGeometryData';
 
 
 export default function Wheel({ ...props }: { [p: string]: any }) {
@@ -160,13 +165,21 @@ export default function Wheel({ ...props }: { [p: string]: any }) {
       {...props}
     >
       <WinnerText/>
-      <Pointer
-        material={outlineMaterialRef.current}
+      <group
+        name="pointer"
         position={[ -geometry.radius, 0, geometry.thickness ]}
-      />
-      <OuterRing
-        material={outlineMaterialRef.current}
-      />
+      >
+        <ProceduralMesh
+          generator={GeneratePointerGeometryData}
+          material={outlineMaterialRef.current}
+        />
+      </group>
+      <group name="outer-ring">
+        <ProceduralMesh
+          generator={GenerateRingGeometryData}
+          material={outlineMaterialRef.current}
+        />
+      </group>
       <mesh
         material={outlineMaterialRef.current}
         position={[ 0, 0, geometry.thickness ]}
