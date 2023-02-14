@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+    input[type="color"]::-moz-color-swatch {
+        border: none;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+        padding: 0;
+        border-radius: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
+        border: none;
+    }
+}
+
 @layer components {
     .panel-container {
         @apply flex absolute w-full h-full;
@@ -19,7 +34,7 @@
     }
 
     .bottom-btn {
-        @apply text-white px-2 rounded-md text-xs aspect-square transition-all
+        @apply text-white px-2 rounded-md text-sm aspect-square transition-all
         disabled:bg-gray-400 disabled:cursor-not-allowed hover:scale-110 hover:rotate-6;
     }
 }

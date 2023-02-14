@@ -24,20 +24,6 @@ export default function TwitchLoader() {
       <div className="m-auto align-middle animate-pulse">
         <FaTwitch className="mx-auto text-6xl" />
         <div className="mx-auto h-8" />
-        <div className="mt-10">
-          { !ready && (
-            <span>
-              Подключение к&nbsp;
-              <b>
-                {state.matches('disconnected') && ('irc-ws.chat.twitch.tv')}
-                {state.matches('joining') && (state.context.channels.join(', '))}
-              </b>
-            </span>
-          )}
-          { ready && (
-            <span>Готово</span>
-          )}
-        </div>
       </div>
     </div>
   );

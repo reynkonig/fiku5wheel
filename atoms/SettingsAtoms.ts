@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 
 import {
   ISpinSettings,
@@ -7,8 +8,8 @@ import {
 } from '../common/interfaces';
 
 
-export const channelsAtom = atom<string[]>([ 'fiku5golubev' ])
-export const maxItemsCountAtom = atom<number>(256);
+export const defaultChannelsAtom = atomWithStorage<string[]>('settings.default_channels', [ 'fiku5golubev' ]);
+export const maxItemsCountAtom = atomWithStorage<number>('settings.max_items_count', 256);
 export const geometrySettingsAtom = atom<IWheelGeometrySettings>({
   radius: 2,
   centerRadiusPercent: 0.02,
@@ -19,7 +20,7 @@ export const geometrySettingsAtom = atom<IWheelGeometrySettings>({
   pointerThickness: 0.01,
 });
 
-export const paletteAtom = atom<IWheelColorPalette>({
+export const paletteAtom = atomWithStorage<IWheelColorPalette>('settings.palette', {
   sectorA: "#00c5ff",
   sectorB: "#00acff",
   sectorC: "#ffee00",

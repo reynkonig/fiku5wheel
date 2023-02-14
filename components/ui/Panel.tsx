@@ -17,9 +17,13 @@ import {
   FaLock,
   FaEraser,
   FaLockOpen,
+  FaSlidersH,
 } from 'react-icons/fa';
+import { panelMachineAtom } from '../../atoms/PanelAtoms';
+import Settings from './settings/Settings';
 
 export default function Panel() {
+  const [ state, send ] = useAtom(panelMachineAtom);
   const maxItemsCount = useAtomValue(maxItemsCountAtom);
 
   const clearItems = useSetAtom(clearItemsAtom);
@@ -59,12 +63,18 @@ export default function Panel() {
           </button>
         </div>
         <div className="panel-section bg-white pt-2 rounded-md flex justify-end px-2 pb-2 shadow">
-              <div className="flex w-full rounded-md bg-gray-300 text-white justify-center items-center pt-px overflow-hidden">
-                <span className="absolute w-auto flex">
-                  {items.length}&nbsp;/&nbsp;{maxItemsCount}
-                </span>
-                <div className="flex h-full bg-violet-500 mr-auto transition-all duration-75" style={{ width: `${Math.round(items.length / maxItemsCount * 100)}%` }}/>
-              </div>
+          <button
+            className="bottom-btn bg-yellow-400"
+            onClick={() => state.matches('settings') ? send('BACK') : send('OPEN_SETTINGS')}
+          >
+            <FaSlidersH className="scale-110" />
+          </button>
+          <div className="flex w-full rounded-md bg-gray-300 text-white justify-center items-center pt-px overflow-hidden">
+            <span className="absolute w-auto flex">
+              {items.length}&nbsp;/&nbsp;{maxItemsCount}
+            </span>
+            <div className="flex h-full bg-violet-500 mr-auto transition-all duration-75" style={{ width: `${Math.round(items.length / maxItemsCount * 100)}%` }}/>
+          </div>
           <AddButton />
           <button
             className="bottom-btn bg-red-500"
@@ -74,17 +84,24 @@ export default function Panel() {
             <FaEraser />
           </button>
         </div>
-        { winner && (<WinnerSection />) }
-        <div className="rounded-md shadow bg-white overflow-y-auto overflow-x-hidden rounded-md">
-          {items.filter((item) => item !== winner).map(
-            (item) => (
-              <ListItem
-                key={item.label}
-                item={item}
-              />
-            )
-          )}
-        </div>
+        { state.matches('main') && (
+          <>
+            { winner && (<WinnerSection />) }
+            <div className="rounded-md shadow bg-white overflow-y-auto overflow-x-hidden rounded-md">
+              {
+                items.filter((item) => item !== winner).map(
+                  (item) => (
+                    <ListItem
+                      key={item.label}
+                      item={item}
+                    />
+                  )
+                )
+              }
+            </div>
+          </>
+        ) }
+        { state.matches('settings') && ( <Settings /> ) }
       </div>
     </div>
   );

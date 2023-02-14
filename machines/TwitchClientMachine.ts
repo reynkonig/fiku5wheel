@@ -1,25 +1,29 @@
-import { assign, createMachine } from 'xstate';
+import _ from 'lodash';
 import { Client } from 'tmi.js';
+import { assign, createMachine } from 'xstate';
 
 import {
   TwitchMessageHandler,
   GetTwitchChannelBadgesMethod
 } from '../common/types';
+import { timeoutPromise } from '../common/utils';
 
 type TwitchClientContext = {
   channels: string[],
+  pendingChannel: string;
   messageHandler: TwitchMessageHandler,
   getChannelBadgesMethod: GetTwitchChannelBadgesMethod
 }
 
-const createTwitchClientMachine = ({ channels, messageHandler, getChannelBadgesMethod }: TwitchClientContext) => createMachine<TwitchClientContext>({
+const createTwitchClientMachine = ({ pendingChannel, channels, messageHandler, getChannelBadgesMethod }: TwitchClientContext) => createMachine<TwitchClientContext>({
   id: 'state',
   initial: 'uninitialized',
   predictableActionArguments: true,
   context: {
-    channels,
+    pendingChannel,
     messageHandler,
-    getChannelBadgesMethod
+    channels,
+    getChannelBadgesMethod,
   },
   states: {
     uninitialized: {
@@ -27,8 +31,13 @@ const createTwitchClientMachine = ({ channels, messageHandler, getChannelBadgesM
         id: 'twitch_client_initialize',
         src: async (ctx) => {
           if (!window.twitchClient) {
-            window.twitchClient = new Client({ options: { debug: false } });
+            window.twitchClient = new Client({ channels: _.cloneDeep(ctx.channels), options: { debug: true } });
             window.twitchClient.on('message', ctx.messageHandler);
+            window.twitchClient.on('join', (channel: string, username: string, self: boolean) => {
+              if(self) {
+                ctx.getChannelBadgesMethod(channel.replace('#', ''));
+              }
+            });
           }
           else {
             window.twitchClient.removeAllListeners();
@@ -45,81 +54,77 @@ const createTwitchClientMachine = ({ channels, messageHandler, getChannelBadgesM
             return await window.twitchClient.connect();
           }
         },
-        onDone: 'joining',
+        onDone: 'ready',
         onError: 'disconnected'
       }
     },
     parting: {
       invoke: {
         id: 'twitch_client_parting_channel',
-        src: async (ctx) => {
-          const joinedChannels = window.twitchClient.getChannels();
-          const { channels: requiredChannels } = ctx;
-          await Promise.all(
-            joinedChannels.map(async (joinedChannel) => {
-              return (
-                !requiredChannels.includes(joinedChannel.substring(1))
-                  ? await window.twitchClient.part(joinedChannel)
-                  : ''
-              )
-            })
-          );
+        src: async (ctx, event) => {
+          try {
+            await timeoutPromise(window.twitchClient.part(event.value), 2500);
+          } catch (error) {}
+
+          return event.value;
         },
-        onDone: 'ready',
-        onError: 'rollback'
+        onDone: {
+          target: 'ready',
+          actions: [ assign({
+            pendingChannel: (ctx, event) => '',
+            channels: (ctx, event) => ctx.channels.filter((val) => val != event.data)
+          }), 'clearPendingChannel']
+        }
       }
     },
     joining: {
       invoke: {
         id: 'twitch_client_join_channel',
-        src: async (ctx) => {
-          const joinedChannels = window.twitchClient.getChannels();
-          const { channels: requiredChannels } = ctx;
-
-          await Promise.all(
-            requiredChannels.map(async (requiredChannel) => {
-              if (!joinedChannels.includes(`#${requiredChannel}`)) {
-                await window.twitchClient.join(requiredChannel)
-                ctx.getChannelBadgesMethod(requiredChannel);
-              }
-            })
-          );
+        src: async (ctx, event) => {
+         if(event.value) {
+           return await timeoutPromise(
+             window.twitchClient.join(event.value),
+             2500
+           );
+         }
         },
-        onDone: 'ready',
-        onError: 'rollback',
-      }
-    },
-    rollback: {
-      invoke: {
-        id: 'twitch_client_rollback_channels',
-        src: assign({
-          channels: () => (
-            window.twitchClient.getChannels()
-              .map((channel) => (
-                channel.replace('#', ''))
-              )
-          )
-        })
+        onDone: {
+          target: 'ready',
+          actions: [assign( {
+            channels: (ctx, event) => {
+              return event.data
+                ? [...ctx.channels, event.data[0].replace('#', '')]
+                : ctx.channels;
+            }
+          }), 'clearPendingChannel' ]
+        },
+        onError: 'ready',
       }
     },
     ready: {
       on: {
         PART: {
           target: 'parting',
-          actions: assign({
-            channels: (ctx, event) => ctx.channels.filter((channel) => channel !== event.value)
-          })
+          actions: ['setPendingChannel']
         },
         JOIN: {
           target: 'joining',
-          actions: assign({
-            channels: (ctx, event) => [...ctx.channels, event.value]
-          })
+          actions: ['setPendingChannel']
         }
       }
     }
   },
-})
+}, {
+  actions: {
+    clearPendingChannel: assign({
+      pendingChannel: (ctx, event) => ''
+    }),
+    setPendingChannel: assign({
+      pendingChannel: (ctx, event) => event.value
+    }),
+  }
+});
+
 
 
 export { createTwitchClientMachine };

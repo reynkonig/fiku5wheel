@@ -45,10 +45,10 @@ export default function Wheel({ ...props }: { [p: string]: any }) {
   const [ hovered, setHovered ] = useState<boolean>(false);
 
   const sectorGeometryRef = useRef<THREE.BufferGeometry>(new THREE.BufferGeometry());
-  const sectorMaterialARef = useRef<THREE.Material>(new THREE.MeshBasicMaterial({ color: palette.sectorA }));
-  const sectorMaterialBRef = useRef<THREE.Material>(new THREE.MeshBasicMaterial({ color: palette.sectorB }));
-  const sectorMaterialCRef = useRef<THREE.Material>(new THREE.MeshBasicMaterial({ color: palette.sectorC }));
-  const outlineMaterialRef = useRef<THREE.Material>(new THREE.MeshBasicMaterial({ color: palette.outline }));
+  const sectorMaterialARef = useRef<THREE.MeshBasicMaterial>(new THREE.MeshBasicMaterial());
+  const sectorMaterialBRef = useRef<THREE.MeshBasicMaterial>(new THREE.MeshBasicMaterial());
+  const sectorMaterialCRef = useRef<THREE.MeshBasicMaterial>(new THREE.MeshBasicMaterial());
+  const outlineMaterialRef = useRef<THREE.MeshBasicMaterial>(new THREE.MeshBasicMaterial());
 
   const rotatablePartRef = useRef<THREE.Group>(null!);
   const totalTransformRef = useRef<THREE.Group>(null!);
@@ -86,6 +86,13 @@ export default function Wheel({ ...props }: { [p: string]: any }) {
   useEffect(() => {
     document.body.style.cursor = hovered ? 'pointer' : 'auto';
   }, [ hovered ])
+
+  useEffect(() => {
+    sectorMaterialARef.current.color = new THREE.Color(palette.sectorA);
+    sectorMaterialBRef.current.color = new THREE.Color(palette.sectorB);
+    sectorMaterialCRef.current.color = new THREE.Color(palette.sectorC);
+    outlineMaterialRef.current.color = new THREE.Color(palette.outline);
+  }, [ palette ])
 
   useEffect(() => {
     if (sectorGeometryRef.current) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
 import { Analytics } from '@vercel/analytics/react';
-import { Comfortaa } from '@next/font/google'
+import { Nunito } from '@next/font/google'
 import type { AppProps } from 'next/app'
 
 import { Provider } from 'jotai';
@@ -10,7 +10,7 @@ import store from '../atoms/StoreAtom';
 
 import '../styles/globals.css'
 
-const comfortaa = Comfortaa({ weight: [ '500' ], display: 'swap', subsets: ['cyrillic'] })
+const font = Nunito({ weight: [ '400', '500', '600', '700' ], subsets: ['cyrillic'] })
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -18,7 +18,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <Head>
         <title>Срулетка</title>
       </Head>
-      <main className={comfortaa.className}>
+      <main className={font.className}>
         <Component {...pageProps} />
       </main>
       <Analytics />

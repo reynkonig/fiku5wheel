@@ -11,7 +11,7 @@ import store from './StoreAtom';
 
 import { itemsAtom } from './ItemAtoms';
 import { badgesAtom } from './ContentAtoms';
-import { channelsAtom } from './SettingsAtoms';
+import { defaultChannelsAtom } from './SettingsAtoms';
 import { chatMembersCanJoinAtom, joinMessageAtom } from './SessionAtoms';
 
 const messageHandler = (channel: string, userstate: Userstate, message: string) => {
@@ -37,7 +37,8 @@ const getChannelBadgesMethod = (channel: string) => {
 
 export const twitchClientMachineAtom = atomWithMachine((get) =>
   createTwitchClientMachine({
-    channels: get(channelsAtom),
+    pendingChannel: '',
+    channels: get(defaultChannelsAtom),
     messageHandler,
     getChannelBadgesMethod
   })
